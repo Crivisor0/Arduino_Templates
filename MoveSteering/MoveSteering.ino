@@ -1,28 +1,39 @@
-typedef struct
-{
-  short forwardPin;
-  short backwardPin;
-  short speedPin;
-} motor;
+struct motor_t {
+  unsigned char forwardPin;
+  unsigned char backwardPin;
+  unsigned char speedPin;
+};
 
-motor motorA;  // right
-motor motorB;  // left
+motor_t motorA;  // right
+motor_t motorB;  // left
+
+unsigned char lastDir = LOW;
+short leftSpeed[2] = { 0, 0 };
+short rightSpeed[2] = { 0, 0 };
 
 void moveSteering(short speed, short steer) {
-  short leftSpeed =
-    (abs(speed) - (steer * ((steer < 0) ? -1 : 0));
+  leftSpeed[1] = (abs(speed) - (steer * ((steer < 0) ? -1 : 0));
 
-  short rightSpeed = 
-    (abs(speed) - (steer * ((steer >= 0) ? 1 : 0));
+  rightSpeed[1] =(abs(speed) - (steer * ((steer >= 0) ? 1 : 0));
 
-  byte dir = (speed >= 0) ? HIGH : LOW;
+  unsigned char dir = (speed >= 0) ? HIGH : LOW;
   // Use motor control way example on standard L298N
-  digitalWrite(motorA.forwardPin, dir);
-  digitalWrite(motorA.backwardPin, !dir); // Flip it to low if forward and to high if backward
-//
-  digitalWrite(motorB.forwardPin, dir);
-  digitalWrite(motorB.backwardPin, !dir); // Flip it to low if forward and to high if backward
-//
-  analogWrite(motorA.speedPin, rightSpeed);
-  analogWrite(motorB.speedPin, leftSpeed);
+  if (dir != lastDir) {
+    digitalWrite(motorA.forwardPin, dir);
+    digitalWrite(motorA.backwardPin, !dir);  // Flip it to low if forward and to high if backward
+                                             //
+    digitalWrite(motorB.forwardPin, dir);
+    digitalWrite(motorB.backwardPin, !dir);  // Flip it to low if forward and to high if backward
+    //
+    lastDir = dir;
+  }
+  //
+  if (leftSpeed[0] != leftSpeed[1]) {
+    analogWrite(motorB.speedPin, rightSpeed);
+    leftSPeed[0] = leftSpeed[1];
+  }
+  if (rightSpeed[0] != rightSpeed[1]) {
+    analogWrite(motorA.speedPin, rightSpeed);
+    rightSpeed[0] = rightSpeed[1];
+  }
 }
